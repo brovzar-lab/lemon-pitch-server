@@ -7,6 +7,9 @@ const path = require('path');
 const fetch = require('node-fetch');
 const { parsePitchDocument } = require('./pitchParser');
 
+// Pre-bundled pitch scripts (full text, pre-parsed at build time)
+const BUNDLED_SCRIPTS = require('./pitchScripts.json');
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -38,35 +41,41 @@ let pitchStore = []; // Array of enriched pitch objects keyed by projectId
 const HARDCODED_MAPPING = require('./pitchMapping.json');
 
 async function loadPitches() {
-  console.log('Loading pitch document from Paperclip API...');
-  let parsedPitches = [];
+  // Start from bundled scripts (pre-parsed at build time, always available)
+  const scriptsByNumber = {};
+  for (const s of BUNDLED_SCRIPTS) {
+    scriptsByNumber[s.pitchNumber] = s;
+  }
 
+  // Attempt to refresh from live Paperclip API (updates devStage/billyVerdict, re-parses scripts)
   try {
     const res = await fetch(
       `${PAPERCLIP_API_URL}/api/issues/${PITCH_DOC_ISSUE_ID}/documents/pitch-session`,
-      { headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}` } }
+      { headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}` }, timeout: 8000 }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const doc = await res.json();
-    parsedPitches = parsePitchDocument(doc.body);
-    console.log(`Parsed ${parsedPitches.length} pitches from document.`);
+    const livePitches = parsePitchDocument(doc.body);
+    for (const p of livePitches) {
+      scriptsByNumber[p.pitchNumber] = { ...scriptsByNumber[p.pitchNumber], ...p };
+    }
+    console.log(`Refreshed ${livePitches.length} pitches from Paperclip API.`);
   } catch (err) {
-    console.error('Failed to fetch pitch document, using fallback:', err.message);
+    console.log(`Using bundled pitch scripts (Paperclip API unavailable: ${err.message})`);
   }
 
-  // Merge parsed pitches with the projectId mapping
+  // Merge with projectId mapping and live devStage/verdict from projects
   pitchStore = HARDCODED_MAPPING.map((entry) => {
-    const parsed = parsedPitches.find((p) => p.pitchNumber === entry.pitchNumber);
+    const scripts = scriptsByNumber[entry.pitchNumber] || {};
     return {
       pitchNumber: entry.pitchNumber,
       title: entry.title,
       projectId: entry.projectId,
-      format: entry.format || (parsed && parsed.format) || '',
-      platform: (parsed && parsed.platform) || '',
-      genre: (parsed && parsed.genre) || '',
-      cleanScript: (parsed && parsed.cleanScript) || '',
-      logline: (parsed && parsed.logline) || '',
-      story: (parsed && parsed.story) || '',
+      format: scripts.format || entry.format || '',
+      platform: scripts.platform || '',
+      genre: scripts.genre || '',
+      cleanScript: scripts.cleanScript || '',
+      logline: scripts.logline || '',
       devStage: entry.devStage,
       billyVerdict: entry.billyVerdict,
     };
