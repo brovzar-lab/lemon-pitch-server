@@ -1,0 +1,6 @@
+node_modules
+.env
+audio-cache/*.mp3
+.git
+.railway
+railway.toml
