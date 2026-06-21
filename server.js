@@ -303,53 +303,62 @@ app.get('/stats', (req, res) => {
 });
 
 // POST /pitches/:projectId/verdict — record verdict locally, sync to Paperclip in background
+// IMPORTANT: This handler is intentionally synchronous. The Paperclip cloud sync is
+// fire-and-forget so that Railway's inability to reach api.paperclip.ing never blocks the
+// verdict response. Local in-memory state + pitchMapping.json are the sources of truth.
 app.post('/pitches/:projectId/verdict', (req, res) => {
-  const { verdict } = req.body;
-  const { projectId } = req.params;
-
-  if (!verdict || !VERDICT_MAP[verdict]) {
-    return res.status(400).json({ error: 'verdict must be "approve", "vault", or "reject"' });
-  }
-
-  const pitch = pitchStore.find((p) => p.projectId === projectId);
-  if (!pitch) return res.status(404).json({ error: 'Pitch not found' });
-
-  const payload = VERDICT_MAP[verdict];
-
-  // Update in-memory state immediately — this is the source of truth for filtering
-  pitch.billyVerdict = payload.billyVerdict;
-  pitch.devStage = payload.devStage;
-
-  // Persist to pitchMapping.json so verdicts survive server restarts
   try {
-    const mappingPath = path.join(__dirname, 'pitchMapping.json');
-    const mapping = JSON.parse(fs.readFileSync(mappingPath, 'utf8'));
-    const entry = mapping.find((e) => e.projectId === projectId);
-    if (entry) {
-      entry.billyVerdict = payload.billyVerdict;
-      entry.devStage = payload.devStage;
-      fs.writeFileSync(mappingPath, JSON.stringify(mapping, null, 2));
+    const body = req.body || {};
+    const { verdict } = body;
+    const { projectId } = req.params;
+
+    if (!verdict || !VERDICT_MAP[verdict]) {
+      return res.status(400).json({ error: 'verdict must be "approve", "vault", or "reject"' });
     }
-  } catch (writeErr) {
-    console.error('Failed to persist verdict to pitchMapping.json:', writeErr.message);
-  }
 
-  // Respond immediately — local state is already updated
-  res.json({ projectId, verdict: payload.billyVerdict, devStage: payload.devStage, title: pitch.title });
+    const pitch = pitchStore.find((p) => p.projectId === projectId);
+    if (!pitch) return res.status(404).json({ error: 'Pitch not found' });
 
-  // Fire-and-forget Paperclip cloud sync (non-blocking, best-effort)
-  if (PAPERCLIP_API_KEY) {
-    fetch(`${PAPERCLIP_API_URL}/api/projects/${projectId}`, {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-      .then((r) => {
-        if (!r.ok) return r.text().then((t) => { throw new Error(`HTTP ${r.status}: ${t.slice(0, 200)}`) });
-        return r.json();
+    const payload = VERDICT_MAP[verdict];
+
+    // Update in-memory state first — this is the source of truth for filtering
+    pitch.billyVerdict = payload.billyVerdict;
+    pitch.devStage = payload.devStage;
+
+    // Persist to pitchMapping.json (best-effort — Railway filesystem may be ephemeral)
+    try {
+      const mappingPath = path.join(__dirname, 'pitchMapping.json');
+      const mapping = JSON.parse(fs.readFileSync(mappingPath, 'utf8'));
+      const entry = mapping.find((e) => e.projectId === projectId);
+      if (entry) {
+        entry.billyVerdict = payload.billyVerdict;
+        entry.devStage = payload.devStage;
+        fs.writeFileSync(mappingPath, JSON.stringify(mapping, null, 2));
+      }
+    } catch (writeErr) {
+      console.error('Failed to persist verdict to pitchMapping.json:', writeErr.message);
+    }
+
+    // Respond immediately — local state is already updated
+    res.json({ projectId, verdict: payload.billyVerdict, devStage: payload.devStage, title: pitch.title });
+
+    // Fire-and-forget Paperclip cloud sync (non-blocking, best-effort)
+    if (PAPERCLIP_API_KEY) {
+      fetch(`${PAPERCLIP_API_URL}/api/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       })
-      .then(() => console.log(`Paperclip synced: ${pitch.title} → ${verdict}`))
-      .catch((err) => console.warn(`Paperclip sync skipped (verdict saved locally): ${err.message}`));
+        .then((r) => {
+          if (!r.ok) return r.text().then((t) => { throw new Error(`HTTP ${r.status}: ${t.slice(0, 200)}`) });
+          return r.json();
+        })
+        .then(() => console.log(`Paperclip synced: ${pitch.title} → ${verdict}`))
+        .catch((err) => console.warn(`Paperclip sync skipped (verdict saved locally): ${err.message}`));
+    }
+  } catch (err) {
+    console.error('Unexpected verdict handler error:', err);
+    if (!res.headersSent) res.status(500).json({ error: 'Verdict handler error', detail: err.message });
   }
 });
 
