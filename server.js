@@ -302,8 +302,8 @@ app.get('/stats', (req, res) => {
   });
 });
 
-// POST /pitches/:projectId/verdict — submit verdict to Paperclip
-app.post('/pitches/:projectId/verdict', async (req, res) => {
+// POST /pitches/:projectId/verdict — record verdict locally, sync to Paperclip in background
+app.post('/pitches/:projectId/verdict', (req, res) => {
   const { verdict } = req.body;
   const { projectId } = req.params;
 
@@ -314,57 +314,42 @@ app.post('/pitches/:projectId/verdict', async (req, res) => {
   const pitch = pitchStore.find((p) => p.projectId === projectId);
   if (!pitch) return res.status(404).json({ error: 'Pitch not found' });
 
-  if (!PAPERCLIP_API_KEY) {
-    return res.status(503).json({ error: 'Paperclip API key not configured' });
-  }
-
   const payload = VERDICT_MAP[verdict];
 
+  // Update in-memory state immediately — this is the source of truth for filtering
+  pitch.billyVerdict = payload.billyVerdict;
+  pitch.devStage = payload.devStage;
+
+  // Persist to pitchMapping.json so verdicts survive server restarts
   try {
-    const ppRes = await fetch(`${PAPERCLIP_API_URL}/api/projects/${projectId}`, {
+    const mappingPath = path.join(__dirname, 'pitchMapping.json');
+    const mapping = JSON.parse(fs.readFileSync(mappingPath, 'utf8'));
+    const entry = mapping.find((e) => e.projectId === projectId);
+    if (entry) {
+      entry.billyVerdict = payload.billyVerdict;
+      entry.devStage = payload.devStage;
+      fs.writeFileSync(mappingPath, JSON.stringify(mapping, null, 2));
+    }
+  } catch (writeErr) {
+    console.error('Failed to persist verdict to pitchMapping.json:', writeErr.message);
+  }
+
+  // Respond immediately — local state is already updated
+  res.json({ projectId, verdict: payload.billyVerdict, devStage: payload.devStage, title: pitch.title });
+
+  // Fire-and-forget Paperclip cloud sync (non-blocking, best-effort)
+  if (PAPERCLIP_API_KEY) {
+    fetch(`${PAPERCLIP_API_URL}/api/projects/${projectId}`, {
       method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${PAPERCLIP_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-    });
-
-    if (!ppRes.ok) {
-      const errText = await ppRes.text();
-      console.error('Paperclip verdict error:', ppRes.status, errText);
-      return res.status(502).json({ error: 'Paperclip API error', detail: errText });
-    }
-
-    const updated = await ppRes.json();
-
-    // Update in-memory state
-    pitch.billyVerdict = payload.billyVerdict;
-    pitch.devStage = payload.devStage;
-
-    // Persist verdict to pitchMapping.json so it survives server restarts
-    try {
-      const mappingPath = path.join(__dirname, 'pitchMapping.json');
-      const mapping = JSON.parse(fs.readFileSync(mappingPath, 'utf8'));
-      const entry = mapping.find((e) => e.projectId === projectId);
-      if (entry) {
-        entry.billyVerdict = payload.billyVerdict;
-        entry.devStage = payload.devStage;
-        fs.writeFileSync(mappingPath, JSON.stringify(mapping, null, 2));
-      }
-    } catch (writeErr) {
-      console.error('Failed to persist verdict to pitchMapping.json:', writeErr.message);
-    }
-
-    res.json({
-      projectId,
-      verdict: payload.billyVerdict,
-      devStage: payload.devStage,
-      title: pitch.title,
-    });
-  } catch (err) {
-    console.error('Verdict submission error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    })
+      .then((r) => {
+        if (!r.ok) return r.text().then((t) => { throw new Error(`HTTP ${r.status}: ${t.slice(0, 200)}`) });
+        return r.json();
+      })
+      .then(() => console.log(`Paperclip synced: ${pitch.title} → ${verdict}`))
+      .catch((err) => console.warn(`Paperclip sync skipped (verdict saved locally): ${err.message}`));
   }
 });
 
