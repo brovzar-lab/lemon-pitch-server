@@ -24,9 +24,8 @@ const PAPERCLIP_API_URL = process.env.PAPERCLIP_API_URL || 'https://api.papercli
 const PAPERCLIP_COMPANY_ID = process.env.PAPERCLIP_COMPANY_ID || 'ff52ad91-250b-4d9d-a2ee-1d24b65ec3e8';
 const PITCH_DOC_ISSUE_ID = '6159de20-0610-4c00-95fd-fd842e3af93e';
 
-// ElevenLabs voice: Charlie — Deep, Confident, Energetic (hyped)
-// Perfect for an enthusiastic Hollywood pitch executive delivering pitches.
-const ELEVENLABS_VOICE_ID = 'IKne3meq5aSn9XLyUdCD';
+// Default voice: Charlie — Deep, Confident, Energetic
+const DEFAULT_VOICE_ID = 'IKne3meq5aSn9XLyUdCD';
 const ELEVENLABS_MODEL = 'eleven_turbo_v2_5';
 
 const AUDIO_CACHE_DIR = path.join(__dirname, 'audio-cache');
@@ -94,6 +93,29 @@ const VERDICT_MAP = {
 };
 
 // ---------------------------------------------------------------------------
+// Audio cache helpers
+// ---------------------------------------------------------------------------
+function audioCachePath(projectId, voiceId) {
+  return path.join(AUDIO_CACHE_DIR, `${projectId}-${voiceId}.mp3`);
+}
+
+function legacyCachePath(projectId) {
+  // Pre-voice-selection era: files named {projectId}.mp3
+  return path.join(AUDIO_CACHE_DIR, `${projectId}.mp3`);
+}
+
+function findCachedAudio(projectId, voiceId) {
+  const primary = audioCachePath(projectId, voiceId);
+  if (fs.existsSync(primary)) return primary;
+  // For the default voice, fall back to legacy cache file name
+  if (voiceId === DEFAULT_VOICE_ID) {
+    const legacy = legacyCachePath(projectId);
+    if (fs.existsSync(legacy)) return legacy;
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // Routes
 // ---------------------------------------------------------------------------
 
@@ -113,7 +135,7 @@ app.get('/pitches', (req, res) => {
       title: p.title,
       format: p.format,
       projectId: p.projectId,
-      hasSpeech: fs.existsSync(path.join(AUDIO_CACHE_DIR, `${p.projectId}.mp3`)),
+      hasSpeech: !!findCachedAudio(p.projectId, DEFAULT_VOICE_ID),
       verdictStatus: p.billyVerdict || null,
       devStage: p.devStage || null,
     }));
@@ -136,22 +158,25 @@ app.get('/pitches/:projectId', (req, res) => {
     projectId: pitch.projectId,
     devStage: pitch.devStage,
     billyVerdict: pitch.billyVerdict,
-    hasSpeech: fs.existsSync(path.join(AUDIO_CACHE_DIR, `${pitch.projectId}.mp3`)),
+    hasSpeech: !!findCachedAudio(pitch.projectId, DEFAULT_VOICE_ID),
   });
 });
 
-// GET /pitches/:projectId/audio — stream TTS audio, generate + cache on first request
+// GET /pitches/:projectId/audio?voice=voiceId — stream TTS audio
+// Supports HTTP Range requests (required for Safari/iOS audio playback).
 app.get('/pitches/:projectId/audio', async (req, res) => {
   const pitch = pitchStore.find((p) => p.projectId === req.params.projectId);
   if (!pitch) return res.status(404).json({ error: 'Pitch not found' });
 
-  const audioPath = path.join(AUDIO_CACHE_DIR, `${pitch.projectId}.mp3`);
+  const voiceId = (req.query.voice && typeof req.query.voice === 'string')
+    ? req.query.voice
+    : DEFAULT_VOICE_ID;
 
-  // Serve from cache if available
-  if (fs.existsSync(audioPath)) {
-    res.setHeader('Content-Type', 'audio/mpeg');
-    res.setHeader('Cache-Control', 'public, max-age=86400');
-    return fs.createReadStream(audioPath).pipe(res);
+  // Check cache
+  const cached = findCachedAudio(pitch.projectId, voiceId);
+  if (cached) {
+    // res.sendFile handles Range requests automatically (required for Safari/iOS)
+    return res.sendFile(path.resolve(cached));
   }
 
   // Generate via ElevenLabs
@@ -164,9 +189,9 @@ app.get('/pitches/:projectId/audio', async (req, res) => {
   }
 
   try {
-    console.log(`Generating audio for pitch ${pitch.pitchNumber}: ${pitch.title}`);
+    console.log(`Generating audio for pitch ${pitch.pitchNumber}: "${pitch.title}" voice=${voiceId}`);
     const elevenRes = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
       {
         method: 'POST',
         headers: {
@@ -193,20 +218,88 @@ app.get('/pitches/:projectId/audio', async (req, res) => {
       return res.status(502).json({ error: 'TTS generation failed', detail: errText });
     }
 
-    // Write to cache and stream to client
-    const writeStream = fs.createWriteStream(audioPath);
-    res.setHeader('Content-Type', 'audio/mpeg');
-    res.setHeader('Cache-Control', 'public, max-age=86400');
+    // Buffer all chunks — avoids the double-pipe race condition and ensures
+    // complete data before writing cache and setting Content-Length for Range support.
+    const chunks = [];
+    elevenRes.body.on('data', (chunk) => chunks.push(chunk));
+    elevenRes.body.on('error', (err) => {
+      console.error('ElevenLabs stream error:', err);
+      if (!res.headersSent) res.status(500).json({ error: 'Stream error from ElevenLabs' });
+    });
+    elevenRes.body.on('end', () => {
+      const buffer = Buffer.concat(chunks);
 
-    elevenRes.body.pipe(writeStream);
-    elevenRes.body.pipe(res);
+      // Write to cache (fire-and-forget, don't block the response)
+      const cacheFile = audioCachePath(pitch.projectId, voiceId);
+      fs.writeFile(cacheFile, buffer, (err) => {
+        if (err) console.error('Audio cache write error:', err);
+        else console.log(`Cached: ${path.basename(cacheFile)}`);
+      });
 
-    writeStream.on('error', (err) => console.error('Cache write error:', err));
-    elevenRes.body.on('error', (err) => console.error('ElevenLabs stream error:', err));
+      // Serve to client with full Range support headers
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Content-Length', buffer.length);
+      res.setHeader('Accept-Ranges', 'bytes');
+      res.end(buffer);
+    });
   } catch (err) {
     console.error('Audio generation error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    if (!res.headersSent) res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+// GET /voices — list available ElevenLabs voices
+app.get('/voices', async (req, res) => {
+  if (!ELEVENLABS_API_KEY) {
+    return res.json([
+      { id: DEFAULT_VOICE_ID, name: 'Charlie', description: 'Deep, confident, energetic' },
+    ]);
+  }
+
+  try {
+    const voiceRes = await fetch('https://api.elevenlabs.io/v1/voices', {
+      headers: { 'xi-api-key': ELEVENLABS_API_KEY },
+    });
+    if (!voiceRes.ok) throw new Error(`HTTP ${voiceRes.status}`);
+    const data = await voiceRes.json();
+    const voices = data.voices.map((v) => ({
+      id: v.voice_id,
+      name: v.name,
+      description: v.labels
+        ? Object.values(v.labels).filter(Boolean).join(', ')
+        : '',
+      preview_url: v.preview_url || null,
+    }));
+    // Sort so the default voice appears first
+    voices.sort((a, b) => {
+      if (a.id === DEFAULT_VOICE_ID) return -1;
+      if (b.id === DEFAULT_VOICE_ID) return 1;
+      return a.name.localeCompare(b.name);
+    });
+    res.json(voices);
+  } catch (err) {
+    console.error('Failed to fetch ElevenLabs voices:', err.message);
+    res.json([{ id: DEFAULT_VOICE_ID, name: 'Charlie', description: 'Deep, confident, energetic' }]);
+  }
+});
+
+// GET /stats — aggregate pitch verdict stats
+app.get('/stats', (req, res) => {
+  const total = pitchStore.length;
+  const approved = pitchStore.filter((p) => p.billyVerdict === 'approve').length;
+  const vaulted = pitchStore.filter((p) => p.billyVerdict === 'vault').length;
+  const rejected = pitchStore.filter((p) => p.billyVerdict === 'reject').length;
+  const pending = total - approved - vaulted - rejected;
+
+  res.json({
+    total,
+    approved,
+    vaulted,
+    rejected,
+    pending,
+    decided: approved + vaulted + rejected,
+  });
 });
 
 // POST /pitches/:projectId/verdict — submit verdict to Paperclip
@@ -277,8 +370,6 @@ app.post('/pitches/:projectId/verdict', async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // Live devStage refresh via single bulk query (more reliable than 61 individual fetches)
-// Fetches all development_gate board projects, builds a projectId → {devStage, billyVerdict}
-// map, then updates in-memory pitchStore for all known pitches.
 // ---------------------------------------------------------------------------
 async function refreshLiveDevStages() {
   if (!PAPERCLIP_API_KEY) return;
@@ -324,6 +415,6 @@ loadPitches().then(async () => {
   setInterval(refreshLiveDevStages, 5 * 60 * 1000);
   app.listen(PORT, () => {
     console.log(`Lemon Pitch Server running on port ${PORT}`);
-    console.log(`Voice: Charlie (IKne3meq5aSn9XLyUdCD) — Deep, Confident, Energetic`);
+    console.log(`Default voice: Charlie (${DEFAULT_VOICE_ID})`);
   });
 });
