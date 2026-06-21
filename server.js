@@ -102,17 +102,19 @@ app.get('/', (req, res) => {
   res.json({ service: 'lemon-pitch-server', pitches: pitchStore.length, status: 'ok' });
 });
 
-// GET /pitches — list all 61 pitches
+// GET /pitches — list active pitches (devStage === 'development' only)
 app.get('/pitches', (req, res) => {
-  const list = pitchStore.map((p) => ({
-    pitchNumber: p.pitchNumber,
-    title: p.title,
-    format: p.format,
-    projectId: p.projectId,
-    hasSpeech: fs.existsSync(path.join(AUDIO_CACHE_DIR, `${p.projectId}.mp3`)),
-    verdictStatus: p.billyVerdict || null,
-    devStage: p.devStage || null,
-  }));
+  const list = pitchStore
+    .filter((p) => p.devStage === 'development')
+    .map((p) => ({
+      pitchNumber: p.pitchNumber,
+      title: p.title,
+      format: p.format,
+      projectId: p.projectId,
+      hasSpeech: fs.existsSync(path.join(AUDIO_CACHE_DIR, `${p.projectId}.mp3`)),
+      verdictStatus: p.billyVerdict || null,
+      devStage: p.devStage || null,
+    }));
   res.json(list);
 });
 
@@ -258,9 +260,50 @@ app.post('/pitches/:projectId/verdict', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// Live devStage refresh from Paperclip
+// ---------------------------------------------------------------------------
+async function refreshLiveDevStages() {
+  if (!PAPERCLIP_API_KEY) return;
+  try {
+    const res = await fetch(
+      `${PAPERCLIP_API_URL}/api/companies/${PAPERCLIP_COMPANY_ID}/projects?devStage=development`,
+      { headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}` }, timeout: 8000 }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const projects = Array.isArray(data) ? data : (data.projects || []);
+    const devIds = new Set(projects.map((p) => p.id));
+
+    for (const pitch of pitchStore) {
+      if (devIds.has(pitch.projectId)) {
+        pitch.devStage = 'development';
+      } else if (pitch.devStage === 'development' || pitch.devStage == null) {
+        // Was in development but no longer — re-fetch individual record for actual stage
+        try {
+          const r2 = await fetch(`${PAPERCLIP_API_URL}/api/projects/${pitch.projectId}`, {
+            headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}` }, timeout: 5000,
+          });
+          if (r2.ok) {
+            const proj = await r2.json();
+            pitch.devStage = proj.devStage || 'unknown';
+            pitch.billyVerdict = proj.billyVerdict || pitch.billyVerdict;
+          }
+        } catch { /* keep existing value */ }
+      }
+    }
+
+    const devCount = pitchStore.filter((p) => p.devStage === 'development').length;
+    console.log(`Live devStage refresh: ${devCount} of ${pitchStore.length} pitches still in development.`);
+  } catch (err) {
+    console.log(`Live devStage refresh failed (using in-memory state): ${err.message}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Boot
 // ---------------------------------------------------------------------------
-loadPitches().then(() => {
+loadPitches().then(async () => {
+  await refreshLiveDevStages();
   app.listen(PORT, () => {
     console.log(`Lemon Pitch Server running on port ${PORT}`);
     console.log(`Voice: Charlie (IKne3meq5aSn9XLyUdCD) — Deep, Confident, Energetic`);
