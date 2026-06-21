@@ -276,43 +276,36 @@ app.post('/pitches/:projectId/verdict', async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // Live devStage refresh from Paperclip
+// Queries each pitch individually so we get the actual devStage/billyVerdict.
+// The bulk ?devStage=development query returns board members regardless of actual
+// devStage, so individual fetches are the reliable approach.
 // ---------------------------------------------------------------------------
 async function refreshLiveDevStages() {
   if (!PAPERCLIP_API_KEY) return;
-  try {
-    const res = await fetch(
-      `${PAPERCLIP_API_URL}/api/companies/${PAPERCLIP_COMPANY_ID}/projects?devStage=development`,
-      { headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}` }, timeout: 8000 }
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const projects = Array.isArray(data) ? data : (data.projects || []);
-    const devIds = new Set(projects.map((p) => p.id));
 
-    for (const pitch of pitchStore) {
-      if (devIds.has(pitch.projectId)) {
-        pitch.devStage = 'development';
-      } else {
-        // Not in the live development list — re-fetch individual record to get actual stage
-        // This covers intake pitches that were decided in a prior session (e.g. before this server started)
+  const BATCH = 10; // concurrent requests per batch
+  let updated = 0;
+
+  for (let i = 0; i < pitchStore.length; i += BATCH) {
+    const batch = pitchStore.slice(i, i + BATCH);
+    await Promise.all(
+      batch.map(async (pitch) => {
         try {
-          const r2 = await fetch(`${PAPERCLIP_API_URL}/api/projects/${pitch.projectId}`, {
-            headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}` }, timeout: 5000,
+          const r = await fetch(`${PAPERCLIP_API_URL}/api/projects/${pitch.projectId}`, {
+            headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}` },
           });
-          if (r2.ok) {
-            const proj = await r2.json();
-            pitch.devStage = proj.devStage || pitch.devStage;
-            pitch.billyVerdict = proj.billyVerdict || pitch.billyVerdict;
-          }
+          if (!r.ok) return;
+          const proj = await r.json();
+          if (proj.devStage) pitch.devStage = proj.devStage;
+          if (proj.billyVerdict) pitch.billyVerdict = proj.billyVerdict;
+          updated++;
         } catch { /* keep existing value */ }
-      }
-    }
-
-    const devCount = pitchStore.filter((p) => p.devStage === 'development').length;
-    console.log(`Live devStage refresh: ${devCount} of ${pitchStore.length} pitches still in development.`);
-  } catch (err) {
-    console.log(`Live devStage refresh failed (using in-memory state): ${err.message}`);
+      })
+    );
   }
+
+  const decided = pitchStore.filter((p) => DECIDED_STAGES.has(p.devStage)).length;
+  console.log(`Live devStage refresh: ${updated} fetched, ${decided} decided (excluded from queue).`);
 }
 
 // ---------------------------------------------------------------------------
