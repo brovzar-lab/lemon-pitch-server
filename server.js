@@ -102,8 +102,9 @@ app.get('/', (req, res) => {
   res.json({ service: 'lemon-pitch-server', pitches: pitchStore.length, status: 'ok' });
 });
 
-// GET /pitches — list active pitches (exclude already-decided: killed, vaulted, passed, greenlit)
-const DECIDED_STAGES = new Set(['killed', 'vaulted', 'passed', 'greenlit']);
+// GET /pitches — list active pitches (exclude already-decided)
+// 'development' = approved by Billy (devStage set when verdict=approve), should not re-appear in queue
+const DECIDED_STAGES = new Set(['development', 'killed', 'vaulted', 'passed', 'greenlit', 'packaging']);
 app.get('/pitches', (req, res) => {
   const list = pitchStore
     .filter((p) => !DECIDED_STAGES.has(p.devStage))
@@ -275,37 +276,43 @@ app.post('/pitches/:projectId/verdict', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// Live devStage refresh from Paperclip
-// Queries each pitch individually so we get the actual devStage/billyVerdict.
-// The bulk ?devStage=development query returns board members regardless of actual
-// devStage, so individual fetches are the reliable approach.
+// Live devStage refresh via single bulk query (more reliable than 61 individual fetches)
+// Fetches all development_gate board projects, builds a projectId → {devStage, billyVerdict}
+// map, then updates in-memory pitchStore for all known pitches.
 // ---------------------------------------------------------------------------
 async function refreshLiveDevStages() {
   if (!PAPERCLIP_API_KEY) return;
 
-  const BATCH = 10; // concurrent requests per batch
-  let updated = 0;
-
-  for (let i = 0; i < pitchStore.length; i += BATCH) {
-    const batch = pitchStore.slice(i, i + BATCH);
-    await Promise.all(
-      batch.map(async (pitch) => {
-        try {
-          const r = await fetch(`${PAPERCLIP_API_URL}/api/projects/${pitch.projectId}`, {
-            headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}` },
-          });
-          if (!r.ok) return;
-          const proj = await r.json();
-          if (proj.devStage) pitch.devStage = proj.devStage;
-          if (proj.billyVerdict) pitch.billyVerdict = proj.billyVerdict;
-          updated++;
-        } catch { /* keep existing value */ }
-      })
+  try {
+    const r = await fetch(
+      `${PAPERCLIP_API_URL}/api/companies/${PAPERCLIP_COMPANY_ID}/projects?board=development_gate`,
+      { headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}` } }
     );
-  }
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const allProjects = await r.json();
 
-  const decided = pitchStore.filter((p) => DECIDED_STAGES.has(p.devStage)).length;
-  console.log(`Live devStage refresh: ${updated} fetched, ${decided} decided (excluded from queue).`);
+    // Build lookup map projectId → live state
+    const liveMap = {};
+    for (const proj of allProjects) {
+      liveMap[proj.id] = { devStage: proj.devStage, billyVerdict: proj.billyVerdict };
+    }
+
+    let updated = 0;
+    for (const pitch of pitchStore) {
+      const live = liveMap[pitch.projectId];
+      if (live) {
+        if (live.devStage) pitch.devStage = live.devStage;
+        if (live.billyVerdict) pitch.billyVerdict = live.billyVerdict;
+        updated++;
+      }
+    }
+
+    const decided = pitchStore.filter((p) => DECIDED_STAGES.has(p.devStage)).length;
+    const pending = pitchStore.length - decided;
+    console.log(`Bulk devStage refresh: ${updated}/${pitchStore.length} pitches updated — ${pending} pending, ${decided} decided (excluded).`);
+  } catch (err) {
+    console.error(`Bulk devStage refresh failed: ${err.message}. Retaining cached devStages.`);
+  }
 }
 
 // ---------------------------------------------------------------------------
