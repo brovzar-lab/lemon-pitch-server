@@ -102,10 +102,11 @@ app.get('/', (req, res) => {
   res.json({ service: 'lemon-pitch-server', pitches: pitchStore.length, status: 'ok' });
 });
 
-// GET /pitches — list active pitches (devStage === 'development' only)
+// GET /pitches — list active pitches (exclude already-decided: killed, vaulted, passed, greenlit)
+const DECIDED_STAGES = new Set(['killed', 'vaulted', 'passed', 'greenlit']);
 app.get('/pitches', (req, res) => {
   const list = pitchStore
-    .filter((p) => p.devStage === 'development')
+    .filter((p) => !DECIDED_STAGES.has(p.devStage))
     .map((p) => ({
       pitchNumber: p.pitchNumber,
       title: p.title,
@@ -247,6 +248,20 @@ app.post('/pitches/:projectId/verdict', async (req, res) => {
     pitch.billyVerdict = payload.billyVerdict;
     pitch.devStage = payload.devStage;
 
+    // Persist verdict to pitchMapping.json so it survives server restarts
+    try {
+      const mappingPath = path.join(__dirname, 'pitchMapping.json');
+      const mapping = JSON.parse(fs.readFileSync(mappingPath, 'utf8'));
+      const entry = mapping.find((e) => e.projectId === projectId);
+      if (entry) {
+        entry.billyVerdict = payload.billyVerdict;
+        entry.devStage = payload.devStage;
+        fs.writeFileSync(mappingPath, JSON.stringify(mapping, null, 2));
+      }
+    } catch (writeErr) {
+      console.error('Failed to persist verdict to pitchMapping.json:', writeErr.message);
+    }
+
     res.json({
       projectId,
       verdict: payload.billyVerdict,
@@ -304,6 +319,8 @@ async function refreshLiveDevStages() {
 // ---------------------------------------------------------------------------
 loadPitches().then(async () => {
   await refreshLiveDevStages();
+  // Sync devStages from Paperclip every 5 minutes to pick up external changes
+  setInterval(refreshLiveDevStages, 5 * 60 * 1000);
   app.listen(PORT, () => {
     console.log(`Lemon Pitch Server running on port ${PORT}`);
     console.log(`Voice: Charlie (IKne3meq5aSn9XLyUdCD) — Deep, Confident, Energetic`);
