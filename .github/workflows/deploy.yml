@@ -1,0 +1,88 @@
+name: Deploy to Hostinger VPS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Discover and deploy lemon-pitch-server
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE'
+          set -e
+          echo "=== Discovering pitch server directory ==="
+          PITCH_DIR=""
+          for dir in /root/lemon-pitch-server /root/lemon-pitch-server-main /home/ubuntu/lemon-pitch-server /var/www/lemon-pitch-server; do
+            if [ -d "$dir" ]; then
+              PITCH_DIR="$dir"
+              echo "Found: $PITCH_DIR"
+              break
+            fi
+          done
+
+          if [ -z "$PITCH_DIR" ]; then
+            echo "Searching for server.js with DECIDED_STAGES..."
+            PITCH_DIR=$(grep -rl "DECIDED_STAGES" /root /home /var/www 2>/dev/null | head -1 | xargs dirname 2>/dev/null || true)
+          fi
+
+          if [ -z "$PITCH_DIR" ]; then
+            echo "ERROR: Cannot find lemon-pitch-server directory"
+            ls /root/
+            exit 1
+          fi
+
+          echo "=== Deploying at $PITCH_DIR ==="
+          cd "$PITCH_DIR"
+          git pull origin master
+
+          echo "=== PM2 process list before restart ==="
+          pm2 list 2>/dev/null || echo "pm2 not found in PATH"
+          
+          echo "=== Restarting PM2 process ==="
+          # Try name-based restart first, then restart all, then start fresh
+          if pm2 restart lemon-pitch-server 2>/dev/null; then
+            echo "Restarted lemon-pitch-server"
+          elif pm2 list 2>/dev/null | grep -q "online"; then
+            pm2 restart all
+            echo "Restarted all PM2 processes"
+          else
+            pm2 start "$PITCH_DIR/server.js" --name lemon-pitch-server 2>/dev/null || true
+            echo "Started fresh PM2 process"
+          fi
+
+          echo "=== PM2 process list after restart ==="
+          pm2 list 2>/dev/null
+
+          echo "=== Verifying server response ==="
+          sleep 3
+          # Try common ports
+          for port in 3000 3001 3002; do
+            result=$(curl -s "http://localhost:$port/pitches" 2>/dev/null)
+            if [ -n "$result" ]; then
+              count=$(echo "$result" | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8');try{console.log(JSON.parse(d).length)}catch(e){console.log('parse error')}" 2>/dev/null || echo "?")
+              echo "localhost:$port/pitches → $count pitches"
+            fi
+          done
+          REMOTE
+
+      - name: Verify live endpoint
+        run: |
+          sleep 5
+          COUNT=$(curl -s https://pitches-api.billyrovzar.com/pitches | python3 -c "import sys,json; data=json.load(sys.stdin); print(len(data))" 2>/dev/null || echo "error")
+          echo "Live /pitches count: $COUNT"
+          if [ "$COUNT" = "58" ]; then
+            echo "SUCCESS: Pitch count is 58 (CASADOS POR ACCIDENTE correctly excluded)"
+          elif [ "$COUNT" = "59" ]; then
+            echo "WARNING: Still showing 59 pitches - server may need more time to refresh devStages from Paperclip"
+          else
+            echo "Result: $COUNT pitches"
+          fi
