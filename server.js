@@ -292,15 +292,16 @@ async function refreshLiveDevStages() {
     for (const pitch of pitchStore) {
       if (devIds.has(pitch.projectId)) {
         pitch.devStage = 'development';
-      } else if (pitch.devStage === 'development' || pitch.devStage == null) {
-        // Was in development but no longer — re-fetch individual record for actual stage
+      } else {
+        // Not in the live development list — re-fetch individual record to get actual stage
+        // This covers intake pitches that were decided in a prior session (e.g. before this server started)
         try {
           const r2 = await fetch(`${PAPERCLIP_API_URL}/api/projects/${pitch.projectId}`, {
             headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}` }, timeout: 5000,
           });
           if (r2.ok) {
             const proj = await r2.json();
-            pitch.devStage = proj.devStage || 'unknown';
+            pitch.devStage = proj.devStage || pitch.devStage;
             pitch.billyVerdict = proj.billyVerdict || pitch.billyVerdict;
           }
         } catch { /* keep existing value */ }
