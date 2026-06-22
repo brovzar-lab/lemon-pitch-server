@@ -75,6 +75,7 @@ async function loadPitches() {
       genre: scripts.genre || '',
       cleanScript: scripts.cleanScript || '',
       logline: scripts.logline || '',
+      comps: scripts.comps || '',
       devStage: entry.devStage,
       billyVerdict: entry.billyVerdict,
     };
@@ -171,6 +172,7 @@ app.get('/pitches/:projectId', (req, res) => {
     genre: pitch.genre,
     cleanScript: pitch.cleanScript,
     logline: pitch.logline,
+    comps: pitch.comps || '',
     projectId: pitch.projectId,
     devStage: pitch.devStage,
     billyVerdict: pitch.billyVerdict,
@@ -393,6 +395,35 @@ app.post('/pitches/:projectId/verdict', (req, res) => {
   } catch (err) {
     console.error('Unexpected verdict handler error:', err);
     if (!res.headersSent) res.status(500).json({ error: 'Verdict handler error', detail: err.message });
+  }
+});
+
+// DELETE /pitches/:projectId/verdict — undo verdict (reset to intake/null)
+app.delete('/pitches/:projectId/verdict', (req, res) => {
+  try {
+    const pitch = pitchStore.find((p) => p.projectId === req.params.projectId);
+    if (!pitch) return res.status(404).json({ error: 'Pitch not found' });
+
+    pitch.billyVerdict = null;
+    pitch.devStage = 'intake';
+
+    try {
+      const mappingPath = require('path').join(__dirname, 'pitchMapping.json');
+      const mapping = JSON.parse(require('fs').readFileSync(mappingPath, 'utf8'));
+      const entry = mapping.find((e) => e.projectId === req.params.projectId);
+      if (entry) {
+        entry.billyVerdict = null;
+        entry.devStage = 'intake';
+        require('fs').writeFileSync(mappingPath, JSON.stringify(mapping, null, 2));
+      }
+    } catch (writeErr) {
+      console.error('Failed to persist undo to pitchMapping.json:', writeErr.message);
+    }
+
+    res.json({ projectId: req.params.projectId, reset: true });
+  } catch (err) {
+    console.error('Unexpected undo verdict error:', err);
+    if (!res.headersSent) res.status(500).json({ error: 'Undo handler error', detail: err.message });
   }
 });
 
