@@ -142,6 +142,20 @@ app.get('/pitches', (req, res) => {
   res.json(list);
 });
 
+// GET /pitches/roster — ALL pitches (including decided) for dashboard view
+// Must be registered before /pitches/:projectId to avoid param capture.
+app.get('/pitches/roster', (req, res) => {
+  res.json(pitchStore.map(p => ({
+    pitchNumber: p.pitchNumber,
+    title: p.title,
+    format: p.format,
+    projectId: p.projectId,
+    hasSpeech: !!findCachedAudio(p.projectId, DEFAULT_VOICE_ID),
+    verdictStatus: p.billyVerdict || null,
+    devStage: p.devStage || null,
+  })))
+})
+
 // GET /pitches/:projectId — full pitch detail
 app.get('/pitches/:projectId', (req, res) => {
   const pitch = pitchStore.find((p) => p.projectId === req.params.projectId);
@@ -301,6 +315,23 @@ app.get('/stats', (req, res) => {
     decided: approved + vaulted + rejected,
   });
 });
+
+// POST /refresh — on-demand Paperclip Dev Gate sync, returns full roster as summaries
+app.post('/refresh', async (req, res) => {
+  await refreshLiveDevStages()
+  res.json({
+    synced: new Date().toISOString(),
+    pitches: pitchStore.map(p => ({
+      pitchNumber: p.pitchNumber,
+      title: p.title,
+      format: p.format,
+      projectId: p.projectId,
+      hasSpeech: !!findCachedAudio(p.projectId, DEFAULT_VOICE_ID),
+      verdictStatus: p.billyVerdict || null,
+      devStage: p.devStage || null,
+    })),
+  })
+})
 
 // POST /pitches/:projectId/verdict — record verdict locally, sync to Paperclip in background
 // IMPORTANT: This handler is intentionally synchronous. The Paperclip cloud sync is
