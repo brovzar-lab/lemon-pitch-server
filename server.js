@@ -78,6 +78,7 @@ async function loadPitches() {
       comps: scripts.comps || '',
       devStage: entry.devStage,
       billyVerdict: entry.billyVerdict,
+      createdAt: null,
     };
   });
 
@@ -152,10 +153,12 @@ app.get('/pitches/roster', (req, res) => {
     title: p.title,
     format: p.format,
     genre: p.genre || '',
+    logline: p.logline || '',
     projectId: p.projectId,
     hasSpeech: !!findCachedAudio(p.projectId, DEFAULT_VOICE_ID),
     verdictStatus: p.billyVerdict || null,
     devStage: p.devStage || null,
+    createdAt: p.createdAt || null,
   })))
 })
 
@@ -330,10 +333,12 @@ app.post('/refresh', async (req, res) => {
       title: p.title,
       format: p.format,
       genre: p.genre || '',
+      logline: p.logline || '',
       projectId: p.projectId,
       hasSpeech: !!findCachedAudio(p.projectId, DEFAULT_VOICE_ID),
       verdictStatus: p.billyVerdict || null,
       devStage: p.devStage || null,
+      createdAt: p.createdAt || null,
     })),
   })
 })
@@ -444,7 +449,7 @@ async function refreshLiveDevStages() {
     // Build lookup map projectId → live state
     const liveMap = {};
     for (const proj of allProjects) {
-      liveMap[proj.id] = { devStage: proj.devStage, billyVerdict: proj.billyVerdict };
+      liveMap[proj.id] = { devStage: proj.devStage, billyVerdict: proj.billyVerdict, createdAt: proj.createdAt ?? null };
     }
 
     let updated = 0;
@@ -453,6 +458,7 @@ async function refreshLiveDevStages() {
       if (live) {
         if (live.devStage) pitch.devStage = live.devStage;
         if (live.billyVerdict) pitch.billyVerdict = live.billyVerdict;
+        if (live.createdAt) pitch.createdAt = live.createdAt;
         updated++;
       }
     }
