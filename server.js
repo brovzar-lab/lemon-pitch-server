@@ -565,10 +565,48 @@ async function refreshLiveDevStages() {
       }
     }
 
+    // Auto-discover new pitches from Paperclip Dev Gate not yet in pitchStore.
+    // A real pitch always has `format` set; operational projects (Routines, HR, etc.) have format=null.
+    const existingIds = new Set(pitchStore.map((p) => p.projectId));
+    const newPitches = [];
+    for (const proj of allProjects) {
+      if (!existingIds.has(proj.id) && proj.format && !DECIDED_STAGES.has(proj.devStage)) {
+        newPitches.push(proj);
+      }
+    }
+    if (newPitches.length > 0) {
+      // Sort ascending by pendingSince||createdAt so the newest pitch ends up with the highest
+      // pitchNumber — the Pitch Intelligence Terminal sorts by pitchNumber descending, so highest = first.
+      newPitches.sort((a, b) => {
+        const aDate = a.pendingSince || a.createdAt || '';
+        const bDate = b.pendingSince || b.createdAt || '';
+        return aDate.localeCompare(bDate);
+      });
+      const maxNum = Math.max(...pitchStore.map((p) => p.pitchNumber), 0);
+      let nextNum = maxNum + 1;
+      for (const proj of newPitches) {
+        pitchStore.push({
+          pitchNumber: nextNum++,
+          title: proj.name,
+          projectId: proj.id,
+          format: proj.format || '',
+          genre: '',
+          logline: proj.pitchSynopsis || '',
+          comps: proj.comps || '',
+          cleanScript: '',
+          devStage: proj.devStage || 'intake',
+          billyVerdict: proj.billyVerdict || null,
+          pendingSince: proj.pendingSince || null,
+          createdAt: proj.createdAt || null,
+        });
+      }
+      console.log(`Auto-discovered ${newPitches.length} new pitches from Paperclip (pitchNumbers ${maxNum + 1}–${nextNum - 1}).`);
+    }
+
     const decided = pitchStore.filter((p) => DECIDED_STAGES.has(p.devStage)).length;
     const pending = pitchStore.length - decided;
     console.log(`Bulk devStage refresh: ${updated}/${pitchStore.length} pitches updated — ${pending} pending, ${decided} decided.`);
-    return { ok: true, updated, decided, pending, total: pitchStore.length };
+    return { ok: true, updated, decided, pending, total: pitchStore.length, discovered: newPitches.length };
   } catch (err) {
     console.error(`Bulk devStage refresh failed: ${err.message}. Retaining cached devStages.`);
     return { ok: false, error: err.message, updated: 0 };
