@@ -534,7 +534,16 @@ async function refreshLiveDevStages() {
     // Build lookup map projectId → live state
     const liveMap = {};
     for (const proj of allProjects) {
-      liveMap[proj.id] = { devStage: proj.devStage, billyVerdict: proj.billyVerdict, createdAt: proj.createdAt ?? null, pendingSince: proj.pendingSince ?? null };
+      liveMap[proj.id] = {
+        devStage: proj.devStage,
+        billyVerdict: proj.billyVerdict,
+        createdAt: proj.createdAt ?? null,
+        pendingSince: proj.pendingSince ?? null,
+        // Enrich pitches that have no script data with Paperclip project fields
+        pitchSynopsis: proj.pitchSynopsis ?? null,
+        comps: proj.comps ?? null,
+        format: proj.format ?? null,
+      };
     }
 
     let updated = 0;
@@ -545,6 +554,10 @@ async function refreshLiveDevStages() {
         if (live.billyVerdict) pitch.billyVerdict = live.billyVerdict;
         if (live.createdAt) pitch.createdAt = live.createdAt;
         if (live.pendingSince) pitch.pendingSince = live.pendingSince;
+        // Fill in logline and comps from Paperclip project if the pitch has no script data
+        if (!pitch.logline && live.pitchSynopsis) pitch.logline = live.pitchSynopsis;
+        if (!pitch.comps && live.comps) pitch.comps = live.comps;
+        if (!pitch.format && live.format) pitch.format = live.format;
         updated++;
       }
     }
