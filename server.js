@@ -361,6 +361,8 @@ function renderAdmin(syncResult) {
     .top5 li:first-child { color: #fff; font-weight: 600; }
     .btn { display: inline-block; background: #f5e642; color: #000; border: none; padding: 14px 28px; font-size: 15px; font-weight: 700; border-radius: 10px; cursor: pointer; margin-top: 8px; width: 100%; text-align: center; }
     .btn:hover { background: #ffe44d; }
+    .btn-primary { display: inline-block; background: #fff; color: #000; text-decoration: none; padding: 16px 28px; font-size: 16px; font-weight: 800; border-radius: 10px; margin-top: 24px; width: 100%; text-align: center; letter-spacing: -0.3px; }
+    .btn-primary:hover { background: #eee; }
     .msg { margin-top: 16px; padding: 12px 16px; border-radius: 8px; font-size: 13px; background: #111; color: #4ade80; }
     .msg.err { color: #f87171; }
     .links { margin-top: 24px; font-size: 12px; color: #444; }
@@ -379,7 +381,8 @@ function renderAdmin(syncResult) {
     <h2>Top 5 by received</h2>
     <ol>${top5.map(p => `<li>${p.title}</li>`).join('')}</ol>
   </div>
-  <form method="POST" action="/refresh?redirect=1">
+  <a class="btn-primary" href="https://pitch.billyrovzar.com" target="_blank">Open Pitch Terminal &rarr;</a>
+  <form method="POST" action="/refresh?redirect=1" style="margin-top:16px;">
     <button class="btn" type="submit">Refresh from Dev Gate</button>
   </form>
   ${syncMsg ? `<div class="msg${syncResult && !syncResult.ok ? ' err' : ''}">${syncMsg}</div>` : ''}
