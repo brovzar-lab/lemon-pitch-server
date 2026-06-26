@@ -39,7 +39,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const PAPERCLIP_API_KEY = process.env.PAPERCLIP_API_KEY;
-const PAPERCLIP_API_URL = process.env.PAPERCLIP_API_URL || 'https://api.paperclip.ing';
+const PAPERCLIP_API_URL = process.env.PAPERCLIP_API_URL || 'https://paperclip.billyrovzar.com';
 const PAPERCLIP_COMPANY_ID = process.env.PAPERCLIP_COMPANY_ID || 'ff52ad91-250b-4d9d-a2ee-1d24b65ec3e8';
 const PITCH_DOC_ISSUE_ID = '6159de20-0610-4c00-95fd-fd842e3af93e';
 
@@ -486,10 +486,16 @@ app.post('/pitches/:projectId/verdict', (req, res) => {
 
     // Fire-and-forget Paperclip cloud sync (non-blocking, best-effort)
     if (PAPERCLIP_API_KEY) {
-      fetch(`${PAPERCLIP_API_URL}/api/projects/${projectId}`, {
-        method: 'PATCH',
+      const syncEndpoint = verdict === 'approve' ? 'approve' : verdict === 'vault' ? 'vault' : 'reject';
+      const syncUrl = `${PAPERCLIP_API_URL}/api/projects/${projectId}/${syncEndpoint}`;
+      // reject requires killReason; creative_pass is the appropriate default for pitch terminal decisions
+      const syncBody = verdict === 'reject'
+        ? JSON.stringify({ killReason: 'creative_pass' })
+        : JSON.stringify({});
+      fetch(syncUrl, {
+        method: 'POST',
         headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: syncBody,
       })
         .then((r) => {
           if (!r.ok) return r.text().then((t) => { throw new Error(`HTTP ${r.status}: ${t.slice(0, 200)}`) });
