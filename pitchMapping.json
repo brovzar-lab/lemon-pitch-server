@@ -4,56 +4,63 @@
     "title": "ABUELA CLAUS (Grandma Claus)",
     "projectId": "3234a75d-7e14-4b0f-9ce2-6208e9dda6a4",
     "format": "Feature Film",
-    "devStage": "intake",
-    "billyVerdict": null
+    "devStage": "killed",
+    "billyVerdict": "reject",
+    "createdAt": "2026-06-08T02:57:33.783Z"
   },
   {
     "pitchNumber": 2,
     "title": "BAJO CONTROL (Under Control)",
     "projectId": "000ec2a6-6771-4479-8032-3859ce5b24ec",
     "format": "Feature Film",
-    "devStage": "intake",
-    "billyVerdict": null
+    "devStage": "vaulted",
+    "billyVerdict": "vault",
+    "createdAt": "2026-06-08T02:51:08.460Z"
   },
   {
     "pitchNumber": 3,
     "title": "CASADOS POR ACCIDENTE (Accidentally Married)",
     "projectId": "6dbed4a2-2b3f-4cfb-b35b-f11ce877e0f3",
     "format": "Feature Film",
-    "devStage": "intake",
-    "billyVerdict": null
+    "devStage": "development",
+    "billyVerdict": "approve",
+    "createdAt": "2026-06-08T10:00:54.289Z"
   },
   {
     "pitchNumber": 4,
     "title": "DISCULPA DE OFICIO (Apology by Trade)",
     "projectId": "1977592a-d45f-46f2-b66b-da0bfbc69915",
     "format": "Feature Film",
-    "devStage": "intake",
-    "billyVerdict": null
+    "devStage": "killed",
+    "billyVerdict": "reject",
+    "createdAt": "2026-06-16T11:17:10.575Z"
   },
   {
     "pitchNumber": 5,
     "title": "EL ALGORITMO NO MIENTE (The Algorithm Doesn't Lie)",
     "projectId": "00367cb7-1519-4aef-a54f-ffff0062cd58",
     "format": "Feature Film",
-    "devStage": "intake",
-    "billyVerdict": null
+    "devStage": "killed",
+    "billyVerdict": "reject",
+    "createdAt": "2026-06-13T07:25:14.461Z"
   },
   {
     "pitchNumber": 6,
     "title": "EL COBRO (The Collection)",
     "projectId": "69a5f958-e8bc-473a-87a0-4ba0899c0c79",
     "format": "Feature Film",
-    "devStage": "intake",
-    "billyVerdict": null
+    "devStage": "killed",
+    "billyVerdict": "reject",
+    "createdAt": "2026-06-19T09:14:29.566Z"
   },
   {
     "pitchNumber": 7,
     "title": "EL COPAL (The Copal)",
     "projectId": "926a6319-03d2-4def-953b-9b4a42fd2166",
     "format": "Feature Film",
-    "devStage": "intake",
-    "billyVerdict": null
+    "devStage": "killed",
+    "billyVerdict": "reject",
+    "createdAt": "2026-06-08T08:16:36.378Z"
   },
   {
     "pitchNumber": 8,
@@ -61,23 +68,26 @@
     "projectId": "17acf5f5-fd7c-46d0-989a-65cbdd10c61e",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T08:17:35.442Z"
   },
   {
     "pitchNumber": 9,
-    "title": "EL HÉROE EQUIVOCADO (The Wrong Hero)",
+    "title": "EL H\u00c9ROE EQUIVOCADO (The Wrong Hero)",
     "projectId": "09860aa7-a146-49bb-8abd-7e4dba97b651",
     "format": "Feature Film",
-    "devStage": "intake",
-    "billyVerdict": null
+    "devStage": "killed",
+    "billyVerdict": "reject",
+    "createdAt": "2026-06-08T10:00:54.254Z"
   },
   {
     "pitchNumber": 10,
     "title": "EL MEJOR AMIGO DE MI MEJOR AMIGO (My Best Friend's Best Friend)",
     "projectId": "2e4669d5-1c72-4e01-85c0-4e5a886c6c45",
     "format": "Feature Film",
-    "devStage": "intake",
-    "billyVerdict": null
+    "devStage": "development",
+    "billyVerdict": "approve",
+    "createdAt": "2026-06-18T18:02:15.844Z"
   },
   {
     "pitchNumber": 11,
@@ -85,7 +95,8 @@
     "projectId": "65e71fd4-d3e4-404f-bd30-24948d48db17",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T10:00:54.370Z"
   },
   {
     "pitchNumber": 12,
@@ -93,7 +104,8 @@
     "projectId": "5d88c201-b2c2-4e62-92dd-b713cf7c6f0f",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T09:30:25.928Z"
   },
   {
     "pitchNumber": 13,
@@ -101,7 +113,8 @@
     "projectId": "ea5199c7-2dd0-4924-b4b8-1b1ef4f7d50a",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T09:24:27.243Z"
   },
   {
     "pitchNumber": 14,
@@ -109,7 +122,8 @@
     "projectId": "fcd02ba4-1673-467b-a730-167bed3a2844",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-19T14:15:22.325Z"
   },
   {
     "pitchNumber": 15,
@@ -117,15 +131,17 @@
     "projectId": "e4045a22-3064-4601-b200-306eea463d86",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-19T09:14:04.906Z"
   },
   {
     "pitchNumber": 16,
-    "title": "EL SEÑOR UNIVERSO (Mr. Universe)",
+    "title": "EL SE\u00d1OR UNIVERSO (Mr. Universe)",
     "projectId": "ac70f210-3bea-4f5b-94c8-64b992d5cc71",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T10:02:02.968Z"
   },
   {
     "pitchNumber": 17,
@@ -133,7 +149,8 @@
     "projectId": "4fa29b2b-3576-4f8a-af99-8409f7c957bf",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-05-31T00:51:14.642Z"
   },
   {
     "pitchNumber": 18,
@@ -141,15 +158,17 @@
     "projectId": "6d98d978-d455-42c5-8e86-6b9e96f45159",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-02T03:19:09.675Z"
   },
   {
     "pitchNumber": 19,
-    "title": "EL ÚNICO INOCENTE (The Only Innocent One)",
+    "title": "EL \u00daNICO INOCENTE (The Only Innocent One)",
     "projectId": "94e4f8c7-c72d-485c-a4a5-b12c1510ae61",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T08:28:41.851Z"
   },
   {
     "pitchNumber": 20,
@@ -157,7 +176,8 @@
     "projectId": "e19a19e2-0050-4b7a-852b-c222d5937c0f",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-05T07:20:19.140Z"
   },
   {
     "pitchNumber": 21,
@@ -165,7 +185,8 @@
     "projectId": "dab05e9b-2b75-4a30-899f-6da3b89db25d",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T02:51:51.036Z"
   },
   {
     "pitchNumber": 22,
@@ -173,7 +194,8 @@
     "projectId": "b6f52f43-4f8d-4d82-9bf7-85cdf8e87384",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-16T11:17:10.437Z"
   },
   {
     "pitchNumber": 23,
@@ -181,7 +203,8 @@
     "projectId": "db150141-643d-4575-a9a8-7b8828e8de03",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T02:57:03.648Z"
   },
   {
     "pitchNumber": 24,
@@ -189,7 +212,8 @@
     "projectId": "eea9475f-50d6-4a26-a0ed-5a078777057b",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T09:24:27.076Z"
   },
   {
     "pitchNumber": 25,
@@ -197,7 +221,8 @@
     "projectId": "06fdc6d0-f35b-4401-944b-afa3a7b4b629",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T08:15:34.574Z"
   },
   {
     "pitchNumber": 26,
@@ -205,7 +230,8 @@
     "projectId": "d6f4e59e-7644-4c9d-b76c-c9c73daed8e0",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T09:26:04.952Z"
   },
   {
     "pitchNumber": 27,
@@ -213,7 +239,8 @@
     "projectId": "c3f9eccd-7969-4f49-b3ad-fff0a62e71b7",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T09:24:26.982Z"
   },
   {
     "pitchNumber": 28,
@@ -221,7 +248,8 @@
     "projectId": "9a1ed4da-3a4f-4390-8325-dc7d42d17e42",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-15T14:15:52.108Z"
   },
   {
     "pitchNumber": 29,
@@ -229,7 +257,8 @@
     "projectId": "36a77212-a5a0-441e-a9a0-77bd5b960df6",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-13T07:26:44.183Z"
   },
   {
     "pitchNumber": 30,
@@ -237,7 +266,8 @@
     "projectId": "06d68357-cfc2-4624-beb3-e0f115aa6c1f",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-15T08:39:12.163Z"
   },
   {
     "pitchNumber": 31,
@@ -245,7 +275,8 @@
     "projectId": "e0451aa3-d4fe-453c-9090-160830141365",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T08:18:33.756Z"
   },
   {
     "pitchNumber": 32,
@@ -253,7 +284,8 @@
     "projectId": "8c242228-0047-4f4a-984e-fae554448592",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-16T11:17:10.517Z"
   },
   {
     "pitchNumber": 33,
@@ -261,15 +293,17 @@
     "projectId": "8ad48dc5-6c7a-4cfd-8c33-43ba73412a78",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-19T14:15:40.880Z"
   },
   {
     "pitchNumber": 34,
-    "title": "LOS VEINTISÉIS (The Twenty-Six)",
+    "title": "LOS VEINTIS\u00c9IS (The Twenty-Six)",
     "projectId": "991ba832-606f-424b-844f-d2629d32d72f",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-15T08:37:53.510Z"
   },
   {
     "pitchNumber": 35,
@@ -277,7 +311,8 @@
     "projectId": "62aeba63-47e1-4369-bcf9-644a8479f05a",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T10:02:03.018Z"
   },
   {
     "pitchNumber": 36,
@@ -285,7 +320,8 @@
     "projectId": "c323a52f-2644-4233-adf7-e8e8746c1526",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T10:02:02.945Z"
   },
   {
     "pitchNumber": 37,
@@ -293,7 +329,8 @@
     "projectId": "b06f90c2-68a0-47a9-bd62-11100c4d5048",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T10:00:54.270Z"
   },
   {
     "pitchNumber": 38,
@@ -301,7 +338,8 @@
     "projectId": "3c8526e3-1c6d-4678-871d-3e6180c5a105",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-19T09:56:31.604Z"
   },
   {
     "pitchNumber": 39,
@@ -309,7 +347,8 @@
     "projectId": "b92f2f53-e6f1-4241-8d38-4062b0907a54",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-13T07:25:14.432Z"
   },
   {
     "pitchNumber": 40,
@@ -317,7 +356,8 @@
     "projectId": "fbad8366-97c3-41d8-9c57-7c54c9f250b2",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T09:30:25.800Z"
   },
   {
     "pitchNumber": 41,
@@ -325,15 +365,17 @@
     "projectId": "d4fc7eac-6313-484d-b193-c7d6d4a5a3ec",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-06T15:06:00.771Z"
   },
   {
     "pitchNumber": 42,
-    "title": "TE INVENTÉ (I Made You Up)",
+    "title": "TE INVENT\u00c9 (I Made You Up)",
     "projectId": "60b27448-d093-47e3-8454-b03e612791fa",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T10:02:02.997Z"
   },
   {
     "pitchNumber": 43,
@@ -341,7 +383,8 @@
     "projectId": "88e2fd3a-978b-4eb9-adc1-867fa674c2b3",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-15T08:39:12.184Z"
   },
   {
     "pitchNumber": 44,
@@ -349,15 +392,17 @@
     "projectId": "75bac379-3dcf-4aa0-89b3-11b2acdb68a3",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-15T08:08:40.791Z"
   },
   {
     "pitchNumber": 45,
-    "title": "UN VOTO DE MÁS (One Vote Too Many)",
+    "title": "UN VOTO DE M\u00c1S (One Vote Too Many)",
     "projectId": "af2b1753-ea93-4e93-a5d3-3e326fe994c6",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-19T09:57:44.723Z"
   },
   {
     "pitchNumber": 46,
@@ -365,7 +410,8 @@
     "projectId": "e67e050d-3cb3-4569-a8d3-d9c8deb2b06b",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-05-31T03:30:15.129Z"
   },
   {
     "pitchNumber": 47,
@@ -373,7 +419,8 @@
     "projectId": "fc8f6d1c-780f-4948-8d41-c0177e5f3905",
     "format": "Premium Drama Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-19T10:00:38.339Z"
   },
   {
     "pitchNumber": 48,
@@ -381,7 +428,8 @@
     "projectId": "6c78703d-fcd5-4515-8a57-d9ab6fd48849",
     "format": "Limited Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-19T09:58:52.401Z"
   },
   {
     "pitchNumber": 49,
@@ -389,7 +437,8 @@
     "projectId": "345f0d50-ba7f-4ecc-8cde-1c409dbafbac",
     "format": "Limited Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T08:19:31.741Z"
   },
   {
     "pitchNumber": 50,
@@ -397,15 +446,17 @@
     "projectId": "8e7388c8-6528-4daf-a0b7-33111d196e24",
     "format": "Comedy Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-15T08:10:23.491Z"
   },
   {
     "pitchNumber": 51,
-    "title": "KÍNDER EJECUTIVO (Executive Kindergarten)",
+    "title": "K\u00cdNDER EJECUTIVO (Executive Kindergarten)",
     "projectId": "eedcd030-737f-4136-8a95-a28cbf38d8b1",
     "format": "Comedy-Drama Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T08:26:41.127Z"
   },
   {
     "pitchNumber": 52,
@@ -413,7 +464,8 @@
     "projectId": "0c7c0034-91aa-40bd-b33f-38890f17beb7",
     "format": "Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T09:35:15.058Z"
   },
   {
     "pitchNumber": 53,
@@ -421,15 +473,17 @@
     "projectId": "d86cdfa3-69c5-4da7-9c0f-ec5312153200",
     "format": "Limited Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-19T07:43:27.758Z"
   },
   {
     "pitchNumber": 54,
-    "title": "LA CONCESIÓN (The Concession)",
+    "title": "LA CONCESI\u00d3N (The Concession)",
     "projectId": "efb76f23-b825-4b22-a96d-7e51ff053d18",
     "format": "Premium Drama Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-05T15:13:46.380Z"
   },
   {
     "pitchNumber": 55,
@@ -437,7 +491,8 @@
     "projectId": "4f4c66ed-1988-4656-9a95-02aedb80a471",
     "format": "Premium Drama Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-05-13T07:16:54.553Z"
   },
   {
     "pitchNumber": 56,
@@ -445,7 +500,8 @@
     "projectId": "12fe8671-8f0e-4c2c-b54f-e3a41a41e2b6",
     "format": "Limited Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T09:33:27.187Z"
   },
   {
     "pitchNumber": 57,
@@ -453,7 +509,8 @@
     "projectId": "69a39c1f-103d-4d78-b6fb-cd335e834425",
     "format": "Limited Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-05T07:20:20.579Z"
   },
   {
     "pitchNumber": 58,
@@ -461,7 +518,8 @@
     "projectId": "f4637791-dada-4e03-8f3c-a8b35398ecb5",
     "format": "Anthology Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T08:20:33.281Z"
   },
   {
     "pitchNumber": 59,
@@ -469,7 +527,8 @@
     "projectId": "e52cbed5-fa25-4901-8bec-9dee3ff4930e",
     "format": "Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-15T08:39:12.182Z"
   },
   {
     "pitchNumber": 60,
@@ -477,7 +536,8 @@
     "projectId": "e5a5efba-8760-427c-a7f8-ae643cf5330b",
     "format": "Limited Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-08T09:35:15.166Z"
   },
   {
     "pitchNumber": 61,
@@ -485,7 +545,8 @@
     "projectId": "32a49bc6-7cab-439c-bdfd-7242833b79fd",
     "format": "Limited Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-15T08:09:57.938Z"
   },
   {
     "pitchNumber": 62,
@@ -493,7 +554,8 @@
     "projectId": "91dad8fb-e0fb-4456-8ff9-72286c3fd056",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-13T22:18:03.098Z"
   },
   {
     "pitchNumber": 63,
@@ -501,23 +563,26 @@
     "projectId": "8680176b-6d2e-4d3b-b8e0-25453c3f22c2",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-14T03:04:34.578Z"
   },
   {
     "pitchNumber": 64,
-    "title": "EL GODÍN DE LOS CIELOS",
+    "title": "EL GOD\u00cdN DE LOS CIELOS",
     "projectId": "7b51b626-bcc0-45c1-9779-302eb04b1db1",
     "format": "",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-14T08:31:57.153Z"
   },
   {
     "pitchNumber": 65,
-    "title": "LA CIGÜEÑA",
+    "title": "LA CIG\u00dcE\u00d1A",
     "projectId": "fc242577-3452-44a4-9b8e-973e3998790f",
     "format": "",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-17T17:54:13.709Z"
   },
   {
     "pitchNumber": 66,
@@ -525,15 +590,17 @@
     "projectId": "d1578934-dd94-464b-9d42-bdb9cc9ad99c",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-19T14:15:01.187Z"
   },
   {
     "pitchNumber": 67,
-    "title": "MIRAR ATRÁS (Look Back)",
+    "title": "MIRAR ATR\u00c1S (Look Back)",
     "projectId": "7ca33001-a325-4640-a9ee-a64d059db302",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T07:15:39.024Z"
   },
   {
     "pitchNumber": 68,
@@ -541,7 +608,8 @@
     "projectId": "d192ff3d-7134-4a01-a8cc-5a0f341a797b",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T08:46:22.149Z"
   },
   {
     "pitchNumber": 69,
@@ -549,7 +617,8 @@
     "projectId": "1be0ac47-4b84-4287-89b1-17b1b035affb",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T08:47:34.441Z"
   },
   {
     "pitchNumber": 70,
@@ -557,7 +626,8 @@
     "projectId": "70d845b2-8049-47cd-9825-b646a883b278",
     "format": "Limited Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T08:48:22.042Z"
   },
   {
     "pitchNumber": 71,
@@ -565,7 +635,8 @@
     "projectId": "c721924a-43c0-4f57-828e-d85ff902b884",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T08:50:21.343Z"
   },
   {
     "pitchNumber": 72,
@@ -573,7 +644,8 @@
     "projectId": "05e0a028-9bcf-4abb-a7ba-dd86820d1582",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T08:50:21.403Z"
   },
   {
     "pitchNumber": 73,
@@ -581,23 +653,26 @@
     "projectId": "ab06497e-ff58-428d-8ff2-e7a467e5ef5e",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T08:50:21.459Z"
   },
   {
     "pitchNumber": 74,
-    "title": "REMISIÓN (Remission)",
+    "title": "REMISI\u00d3N (Remission)",
     "projectId": "d1600545-42f4-4534-a95e-bd36be04e4ae",
     "format": "Limited Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T08:51:55.368Z"
   },
   {
     "pitchNumber": 75,
-    "title": "EL ARCHIVO CÁRDENAS (The Cardenas Archive)",
+    "title": "EL ARCHIVO C\u00c1RDENAS (The Cardenas Archive)",
     "projectId": "ffe9f0b7-607c-4283-9af0-e2955e241345",
     "format": "Drama Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T08:51:55.496Z"
   },
   {
     "pitchNumber": 76,
@@ -605,23 +680,26 @@
     "projectId": "f271537c-fe72-4fd3-931a-636ff95347d8",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T08:53:14.356Z"
   },
   {
     "pitchNumber": 77,
-    "title": "EL AVALÚO (The Appraisal)",
+    "title": "EL AVAL\u00daO (The Appraisal)",
     "projectId": "d9ba9aa3-7258-4068-b926-d138f49eabfe",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T08:53:14.489Z"
   },
   {
     "pitchNumber": 78,
-    "title": "ASÍ NO SE DICE (That's Not How You Say It)",
+    "title": "AS\u00cd NO SE DICE (That's Not How You Say It)",
     "projectId": "fccbcdf3-1f7c-45c0-8395-5b08e9196281",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T08:53:14.644Z"
   },
   {
     "pitchNumber": 79,
@@ -629,7 +707,8 @@
     "projectId": "17ae7b34-56b9-4502-9805-4caa156a76a3",
     "format": "Limited Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T08:54:12.051Z"
   },
   {
     "pitchNumber": 80,
@@ -637,7 +716,8 @@
     "projectId": "6b0f254c-fed6-463e-9ac1-4559d6513b3d",
     "format": "Drama Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T08:54:12.213Z"
   },
   {
     "pitchNumber": 81,
@@ -645,7 +725,8 @@
     "projectId": "bf640222-14cb-4a07-bb1c-def5ec58f563",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T09:51:50.049Z"
   },
   {
     "pitchNumber": 82,
@@ -653,7 +734,8 @@
     "projectId": "5c6c01b4-10d7-4c6b-9812-a0a620b0f0fe",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T09:51:50.066Z"
   },
   {
     "pitchNumber": 83,
@@ -661,7 +743,8 @@
     "projectId": "e0d2d281-dc1a-4071-9942-e341d7cb64ad",
     "format": "Limited Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T09:51:50.081Z"
   },
   {
     "pitchNumber": 84,
@@ -669,7 +752,8 @@
     "projectId": "fd3bfca3-b4c8-42ad-9695-7b01e7dc62b3",
     "format": "Comedy Series",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T09:51:50.096Z"
   },
   {
     "pitchNumber": 85,
@@ -677,6 +761,7 @@
     "projectId": "0c08a76a-f351-4222-86f1-91c36be4661d",
     "format": "Feature Film",
     "devStage": "intake",
-    "billyVerdict": null
+    "billyVerdict": null,
+    "createdAt": "2026-06-22T10:11:21.372Z"
   }
 ]

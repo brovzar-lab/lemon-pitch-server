@@ -78,7 +78,7 @@ async function loadPitches() {
       comps: scripts.comps || '',
       devStage: entry.devStage,
       billyVerdict: entry.billyVerdict,
-      createdAt: null,
+      createdAt: entry.createdAt || null,
     };
   });
 
@@ -325,9 +325,10 @@ app.get('/stats', (req, res) => {
 
 // POST /refresh — on-demand Paperclip Dev Gate sync, returns full roster as summaries
 app.post('/refresh', async (req, res) => {
-  await refreshLiveDevStages()
+  const syncResult = await refreshLiveDevStages()
   res.json({
     synced: new Date().toISOString(),
+    syncResult,
     pitches: pitchStore.map(p => ({
       pitchNumber: p.pitchNumber,
       title: p.title,
@@ -436,14 +437,20 @@ app.delete('/pitches/:projectId/verdict', (req, res) => {
 // Live devStage refresh via single bulk query (more reliable than 61 individual fetches)
 // ---------------------------------------------------------------------------
 async function refreshLiveDevStages() {
-  if (!PAPERCLIP_API_KEY) return;
+  if (!PAPERCLIP_API_KEY) {
+    console.warn('Bulk devStage refresh skipped: PAPERCLIP_API_KEY not set.');
+    return { ok: false, error: 'PAPERCLIP_API_KEY not set', updated: 0 };
+  }
 
   try {
     const r = await fetch(
       `${PAPERCLIP_API_URL}/api/companies/${PAPERCLIP_COMPANY_ID}/projects?board=development_gate`,
       { headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}` } }
     );
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    if (!r.ok) {
+      const text = await r.text().catch(() => '');
+      throw new Error(`HTTP ${r.status}: ${text.slice(0, 200)}`);
+    }
     const allProjects = await r.json();
 
     // Build lookup map projectId → live state
@@ -465,9 +472,11 @@ async function refreshLiveDevStages() {
 
     const decided = pitchStore.filter((p) => DECIDED_STAGES.has(p.devStage)).length;
     const pending = pitchStore.length - decided;
-    console.log(`Bulk devStage refresh: ${updated}/${pitchStore.length} pitches updated — ${pending} pending, ${decided} decided (excluded).`);
+    console.log(`Bulk devStage refresh: ${updated}/${pitchStore.length} pitches updated — ${pending} pending, ${decided} decided.`);
+    return { ok: true, updated, decided, pending, total: pitchStore.length };
   } catch (err) {
     console.error(`Bulk devStage refresh failed: ${err.message}. Retaining cached devStages.`);
+    return { ok: false, error: err.message, updated: 0 };
   }
 }
 
