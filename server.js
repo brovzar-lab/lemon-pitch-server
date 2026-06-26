@@ -127,12 +127,19 @@ app.get('/', (req, res) => {
   res.json({ service: 'lemon-pitch-server', pitches: pitchStore.length, status: 'ok' });
 });
 
-// GET /pitches — list active pitches (exclude already-decided)
-// 'development' = approved by Billy (devStage set when verdict=approve), should not re-appear in queue
+// GET /pitches — list active pitches (exclude already-decided), sorted by pendingSince desc
 const DECIDED_STAGES = new Set(['development', 'killed', 'vaulted', 'passed', 'greenlit', 'packaging']);
+
+function sortByPendingSince(arr) {
+  return arr.slice().sort((a, b) => {
+    const aDate = a.pendingSince || a.createdAt || '';
+    const bDate = b.pendingSince || b.createdAt || '';
+    return bDate.localeCompare(aDate);
+  });
+}
+
 app.get('/pitches', (req, res) => {
-  const list = pitchStore
-    .filter((p) => !DECIDED_STAGES.has(p.devStage))
+  const list = sortByPendingSince(pitchStore.filter((p) => !DECIDED_STAGES.has(p.devStage)))
     .map((p) => ({
       pitchNumber: p.pitchNumber,
       title: p.title,
@@ -151,13 +158,7 @@ app.get('/pitches', (req, res) => {
 // Must be registered before /pitches/:projectId to avoid param capture.
 app.get('/pitches/roster', (req, res) => {
   const includeAll = req.query.all === 'true';
-  const list = (includeAll ? pitchStore : pitchStore.filter((p) => !DECIDED_STAGES.has(p.devStage)))
-    .slice()
-    .sort((a, b) => {
-      const aDate = a.pendingSince || a.createdAt || '';
-      const bDate = b.pendingSince || b.createdAt || '';
-      return bDate.localeCompare(aDate); // newest first
-    });
+  const list = sortByPendingSince(includeAll ? pitchStore : pitchStore.filter((p) => !DECIDED_STAGES.has(p.devStage)));
   res.json(list.map(p => ({
     pitchNumber: p.pitchNumber,
     title: p.title,
@@ -333,9 +334,76 @@ app.get('/stats', (req, res) => {
   });
 });
 
+// GET /admin — browser-accessible admin panel with one-click Refresh button
+function renderAdmin(syncResult) {
+  const intake = sortByPendingSince(pitchStore.filter(p => !DECIDED_STAGES.has(p.devStage)));
+  const top5 = intake.slice(0, 5);
+  const syncMsg = syncResult
+    ? (syncResult.ok ? `Synced ${syncResult.updated} pitches from Dev Gate.` : `Sync failed: ${syncResult.error}`)
+    : '';
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Lemon Pitch Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; padding: 40px 24px; max-width: 560px; margin: 0 auto; }
+    h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+    .sub { color: #666; font-size: 13px; margin-bottom: 32px; }
+    .stat-block { margin-bottom: 28px; }
+    .stat { font-size: 56px; font-weight: 800; color: #f5e642; line-height: 1; }
+    .stat-label { font-size: 13px; color: #666; margin-top: 4px; }
+    .top5 { margin: 24px 0; }
+    .top5 h2 { font-size: 11px; font-weight: 600; letter-spacing: 1px; color: #444; text-transform: uppercase; margin-bottom: 10px; }
+    .top5 ol { padding-left: 20px; }
+    .top5 li { font-size: 14px; padding: 5px 0; color: #bbb; border-bottom: 1px solid #1a1a1a; }
+    .top5 li:first-child { color: #fff; font-weight: 600; }
+    .btn { display: inline-block; background: #f5e642; color: #000; border: none; padding: 14px 28px; font-size: 15px; font-weight: 700; border-radius: 10px; cursor: pointer; margin-top: 8px; width: 100%; text-align: center; }
+    .btn:hover { background: #ffe44d; }
+    .msg { margin-top: 16px; padding: 12px 16px; border-radius: 8px; font-size: 13px; background: #111; color: #4ade80; }
+    .msg.err { color: #f87171; }
+    .links { margin-top: 24px; font-size: 12px; color: #444; }
+    .links a { color: #666; text-decoration: none; margin-right: 12px; }
+    .links a:hover { color: #aaa; }
+  </style>
+</head>
+<body>
+  <h1>Lemon Pitch Admin</h1>
+  <p class="sub">pitches-api.billyrovzar.com</p>
+  <div class="stat-block">
+    <div class="stat">${intake.length}</div>
+    <div class="stat-label">intake pitches in queue</div>
+  </div>
+  <div class="top5">
+    <h2>Top 5 by received</h2>
+    <ol>${top5.map(p => `<li>${p.title}</li>`).join('')}</ol>
+  </div>
+  <form method="POST" action="/refresh?redirect=1">
+    <button class="btn" type="submit">Refresh from Dev Gate</button>
+  </form>
+  ${syncMsg ? `<div class="msg${syncResult && !syncResult.ok ? ' err' : ''}">${syncMsg}</div>` : ''}
+  <div class="links">
+    <a href="/pitches/roster">View roster JSON</a>
+    <a href="/stats">Stats JSON</a>
+    <a href="/admin">Reload page</a>
+  </div>
+</body>
+</html>`;
+}
+
+app.get('/admin', (req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.send(renderAdmin(null));
+});
+
 // POST /refresh — on-demand Paperclip Dev Gate sync, returns full roster as summaries
+// If ?redirect=1 (browser form), redirects to /admin after sync.
 app.post('/refresh', async (req, res) => {
   const syncResult = await refreshLiveDevStages()
+  if (req.query.redirect === '1') {
+    return res.redirect('/admin?synced=1');
+  }
   res.json({
     synced: new Date().toISOString(),
     syncResult,
