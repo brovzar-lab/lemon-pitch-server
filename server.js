@@ -151,7 +151,13 @@ app.get('/pitches', (req, res) => {
 // Must be registered before /pitches/:projectId to avoid param capture.
 app.get('/pitches/roster', (req, res) => {
   const includeAll = req.query.all === 'true';
-  const list = includeAll ? pitchStore : pitchStore.filter((p) => !DECIDED_STAGES.has(p.devStage));
+  const list = (includeAll ? pitchStore : pitchStore.filter((p) => !DECIDED_STAGES.has(p.devStage)))
+    .slice()
+    .sort((a, b) => {
+      const aDate = a.pendingSince || a.createdAt || '';
+      const bDate = b.pendingSince || b.createdAt || '';
+      return bDate.localeCompare(aDate); // newest first
+    });
   res.json(list.map(p => ({
     pitchNumber: p.pitchNumber,
     title: p.title,
