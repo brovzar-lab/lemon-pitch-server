@@ -76,7 +76,7 @@ Then `pm2 restart pitch-api` to pick it up.
 |---|---|---|
 | `ELEVENLABS_API_KEY` | ElevenLabs TTS API key (REQUIRED for audio) | none |
 | `PAPERCLIP_API_KEY` | Paperclip board user JWT for reading project data | none |
-| `PAPERCLIP_API_URL` | Paperclip API base URL | `https://api.paperclip.ing` |
+| `PAPERCLIP_API_URL` | Paperclip API base URL | `https://paperclip.billyrovzar.com` |
 | `PAPERCLIP_COMPANY_ID` | Lemon company ID | `ff52ad91-...` |
 | `PORT` | HTTP port | `3000` |
 
