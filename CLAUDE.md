@@ -75,10 +75,13 @@ Then `pm2 restart pitch-api` to pick it up.
 | Variable | Purpose | Default |
 |---|---|---|
 | `ELEVENLABS_API_KEY` | ElevenLabs TTS API key (REQUIRED for audio) | none |
-| `PAPERCLIP_API_KEY` | Paperclip board user JWT for reading project data | none |
+| `PITCH_WEBHOOK_SECRET` | Shared secret for verdict sync to Paperclip (REQUIRED for verdicts to propagate) | none |
+| `PAPERCLIP_API_KEY` | Paperclip JWT for reading Dev Gate project data (auto-discovery) | none |
 | `PAPERCLIP_API_URL` | Paperclip API base URL | `https://paperclip.billyrovzar.com` |
 | `PAPERCLIP_COMPANY_ID` | Lemon company ID | `ff52ad91-...` |
 | `PORT` | HTTP port | `3000` |
+
+`PITCH_WEBHOOK_SECRET` must match the `PITCH_WEBHOOK_SECRET` env var set in `/root/.secrets/lemon-env` on the Paperclip server. Generate a random value once and paste it in both places.
 
 If `ELEVENLABS_API_KEY` is missing, the `/pitches/:id/audio` endpoint returns `503 "ElevenLabs API key not configured"` and the Pitch Terminal shows "Audio unavailable" for every pitch.
 
