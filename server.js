@@ -146,10 +146,13 @@ app.get('/pitches', (req, res) => {
   res.json(list);
 });
 
-// GET /pitches/roster — ALL pitches (including decided) for dashboard view
+// GET /pitches/roster — active pitches only (mirrors Dev Gate: excludes decided stages)
+// Add ?all=true to include historical decided pitches.
 // Must be registered before /pitches/:projectId to avoid param capture.
 app.get('/pitches/roster', (req, res) => {
-  res.json(pitchStore.map(p => ({
+  const includeAll = req.query.all === 'true';
+  const list = includeAll ? pitchStore : pitchStore.filter((p) => !DECIDED_STAGES.has(p.devStage));
+  res.json(list.map(p => ({
     pitchNumber: p.pitchNumber,
     title: p.title,
     format: p.format,
