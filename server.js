@@ -10,6 +10,25 @@ const { parsePitchDocument } = require('./pitchParser');
 // Pre-bundled pitch scripts (full text, pre-parsed at build time)
 const BUNDLED_SCRIPTS = require('./pitchScripts.json');
 
+// ---------------------------------------------------------------------------
+// Load .env.local if present — lets VPS store ELEVENLABS_API_KEY etc.
+// without committing secrets to git. Keys already in process.env win.
+// ---------------------------------------------------------------------------
+try {
+  const envPath = path.join(__dirname, '.env.local');
+  if (fs.existsSync(envPath)) {
+    fs.readFileSync(envPath, 'utf8').split('\n').forEach((line) => {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) return;
+      const eqIdx = trimmed.indexOf('=');
+      if (eqIdx < 0) return;
+      const k = trimmed.slice(0, eqIdx).trim();
+      const v = trimmed.slice(eqIdx + 1).trim().replace(/^['"]|['"]$/g, '');
+      if (k && !(k in process.env)) process.env[k] = v;
+    });
+  }
+} catch (_) {}
+
 const app = express();
 app.use(cors());
 app.use(express.json());

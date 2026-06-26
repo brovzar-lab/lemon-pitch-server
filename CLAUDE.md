@@ -60,15 +60,27 @@ pm2 restart pitch-api       # restart after deploy
 
 ## Environment Variables
 
-Set on the VPS via pm2 ecosystem file or environment. NOT in `/root/.secrets/lemon-env` (that is for the main Paperclip container only).
+The server loads `/root/lemon-paperclip-dev/lemon-pitch-server/.env.local` automatically at startup (built-in parser, no npm package needed). This file lives on the VPS only, is NOT committed to git, and is the canonical place for secrets.
 
-| Variable | Purpose |
-|---|---|
-| `ELEVENLABS_API_KEY` | ElevenLabs TTS API key |
-| `PAPERCLIP_API_KEY` | Paperclip board user JWT for reading project/issue data |
-| `PAPERCLIP_API_URL` | Defaults to `https://api.paperclip.ing` if not set |
-| `PAPERCLIP_COMPANY_ID` | Defaults to `ff52ad91-250b-4d9d-a2ee-1d24b65ec3e8` (Lemon) |
-| `PORT` | Defaults to `3000` |
+**Create or update the file on VPS:**
+```bash
+cat > /root/lemon-paperclip-dev/lemon-pitch-server/.env.local << 'EOF'
+ELEVENLABS_API_KEY=your_key_here
+PAPERCLIP_API_KEY=your_paperclip_jwt_here
+EOF
+```
+
+Then `pm2 restart pitch-api` to pick it up.
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `ELEVENLABS_API_KEY` | ElevenLabs TTS API key (REQUIRED for audio) | none |
+| `PAPERCLIP_API_KEY` | Paperclip board user JWT for reading project data | none |
+| `PAPERCLIP_API_URL` | Paperclip API base URL | `https://api.paperclip.ing` |
+| `PAPERCLIP_COMPANY_ID` | Lemon company ID | `ff52ad91-...` |
+| `PORT` | HTTP port | `3000` |
+
+If `ELEVENLABS_API_KEY` is missing, the `/pitches/:id/audio` endpoint returns `503 "ElevenLabs API key not configured"` and the Pitch Terminal shows "Audio unavailable" for every pitch.
 
 ---
 
