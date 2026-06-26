@@ -79,6 +79,7 @@ async function loadPitches() {
       devStage: entry.devStage,
       billyVerdict: entry.billyVerdict,
       createdAt: entry.createdAt || null,
+      pendingSince: entry.pendingSince || null,
     };
   });
 
@@ -158,7 +159,7 @@ app.get('/pitches/roster', (req, res) => {
     hasSpeech: !!findCachedAudio(p.projectId, DEFAULT_VOICE_ID),
     verdictStatus: p.billyVerdict || null,
     devStage: p.devStage || null,
-    createdAt: p.createdAt || null,
+    receivedAt: p.pendingSince || p.createdAt || null,
   })))
 })
 
@@ -339,7 +340,7 @@ app.post('/refresh', async (req, res) => {
       hasSpeech: !!findCachedAudio(p.projectId, DEFAULT_VOICE_ID),
       verdictStatus: p.billyVerdict || null,
       devStage: p.devStage || null,
-      createdAt: p.createdAt || null,
+      receivedAt: p.pendingSince || p.createdAt || null,
     })),
   })
 })
@@ -456,7 +457,7 @@ async function refreshLiveDevStages() {
     // Build lookup map projectId → live state
     const liveMap = {};
     for (const proj of allProjects) {
-      liveMap[proj.id] = { devStage: proj.devStage, billyVerdict: proj.billyVerdict, createdAt: proj.createdAt ?? null };
+      liveMap[proj.id] = { devStage: proj.devStage, billyVerdict: proj.billyVerdict, createdAt: proj.createdAt ?? null, pendingSince: proj.pendingSince ?? null };
     }
 
     let updated = 0;
@@ -466,6 +467,7 @@ async function refreshLiveDevStages() {
         if (live.devStage) pitch.devStage = live.devStage;
         if (live.billyVerdict) pitch.billyVerdict = live.billyVerdict;
         if (live.createdAt) pitch.createdAt = live.createdAt;
+        if (live.pendingSince) pitch.pendingSince = live.pendingSince;
         updated++;
       }
     }
