@@ -543,26 +543,31 @@ app.delete('/pitches/:projectId/verdict', (req, res) => {
 // Live devStage refresh via single bulk query (more reliable than 61 individual fetches)
 // ---------------------------------------------------------------------------
 async function refreshLiveDevStages() {
-  if (!PAPERCLIP_API_KEY) {
-    console.warn('Bulk devStage refresh skipped: PAPERCLIP_API_KEY not set.');
-    return { ok: false, error: 'PAPERCLIP_API_KEY not set', updated: 0 };
+  if (!PITCH_WEBHOOK_SECRET) {
+    console.warn('Bulk devStage refresh skipped: PITCH_WEBHOOK_SECRET not set.');
+    return { ok: false, error: 'PITCH_WEBHOOK_SECRET not set', updated: 0 };
   }
 
   try {
     const r = await fetch(
-      `${PAPERCLIP_API_URL}/api/companies/${PAPERCLIP_COMPANY_ID}/projects?board=development_gate`,
-      { headers: { Authorization: `Bearer ${PAPERCLIP_API_KEY}` } }
+      `${PAPERCLIP_API_URL}/api/pitch-webhook/devstages`,
+      {
+        method: 'POST',
+        headers: { 'X-Pitch-Secret': PITCH_WEBHOOK_SECRET, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId: PAPERCLIP_COMPANY_ID }),
+      }
     );
     if (!r.ok) {
       const text = await r.text().catch(() => '');
       throw new Error(`HTTP ${r.status}: ${text.slice(0, 200)}`);
     }
-    const allProjects = await r.json();
+    const data = await r.json();
+    const allProjects = data.projects;
 
     // Build lookup map projectId → live state
     const liveMap = {};
     for (const proj of allProjects) {
-      liveMap[proj.id] = {
+      liveMap[proj.projectId] = {
         devStage: proj.devStage,
         billyVerdict: proj.billyVerdict,
         createdAt: proj.createdAt ?? null,
@@ -595,7 +600,7 @@ async function refreshLiveDevStages() {
     const existingIds = new Set(pitchStore.map((p) => p.projectId));
     const newPitches = [];
     for (const proj of allProjects) {
-      if (!existingIds.has(proj.id) && proj.format && !DECIDED_STAGES.has(proj.devStage)) {
+      if (!existingIds.has(proj.projectId) && proj.format && !DECIDED_STAGES.has(proj.devStage)) {
         newPitches.push(proj);
       }
     }
@@ -613,7 +618,7 @@ async function refreshLiveDevStages() {
         pitchStore.push({
           pitchNumber: nextNum++,
           title: proj.name,
-          projectId: proj.id,
+          projectId: proj.projectId,
           format: proj.format || '',
           genre: '',
           logline: proj.pitchSynopsis || '',
